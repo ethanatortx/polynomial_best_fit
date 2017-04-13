@@ -1,39 +1,48 @@
 #ifndef _CARTESIAN_H
 #define _CARTESIAN_H
 
-#include <limits>
-#include "polar.h"
+#include <initializer_list>
+#include <stdexcept>
 
-class cartesian
+template<unsigned order>
+class cartesian /* cartesian coordinate set of order M */
 {
 public:
-	cartesian(double _x = std::numeric_limits<double>::infinity(), double _y = std::numeric_limits<double>::infinity(), double _z = std::numeric_limits<double>::infinity());
-	cartesian(const cartesian& other);
+	cartesian(); // construct coordinate system with [_m] elements
+	cartesian(std::initializer_list<double> ilist);
 
-	cartesian& operator=(const cartesian&);
+	void clear(); // reset system
+	unsigned size() const; // get dimensions of coordinate
 
-	bool operator==(const cartesian&);
-	bool operator!=(const cartesian&);
-	bool operator<(const cartesian&);
-	bool operator<=(const cartesian&);
-	bool operator>(const cartesian&);
-	bool operator>=(const cartesian&);
+	double& operator[](int); // get reference to coordinate at order
 
-	cartesian operator+(const cartesian&);
-	cartesian& operator+=(const cartesian&);
-	cartesian operator-(const cartesian&);
-	cartesian& operator-=(const cartesian&);
-
-	void x(double);
-	void y(double);
-	void z(double);
-
-	double x() const;
-	double y() const;
-	double z() const;
+	~cartesian(); // delete coordinate array
 
 private:
-	double _x, _y, _z;
+	double* carr; // array of size m containing coordinates
 };
+
+template<unsigned n>
+cartesian<n>::cartesian() { carr = new double[n]; }
+template<unsigned n>
+cartesian<n>::cartesian(std::initializer_list<double> ilist)
+{
+	if(ilist.size() > n)
+		throw std::runtime_error("Inintializer list conatins too many coordinates.");
+	carr = new double[n];
+	for(int i = 0; i < ilist.size(); ++i)
+	{
+		carr[i] = *(ilist.begin()+i);
+	}
+}
+template<unsigned n>
+cartesian<n>::~cartesian() { delete[] carr; }
+
+template<unsigned n>
+void cartesian<n>::clear() { delete[] carr; carr = new double[n]; }
+template<unsigned n>
+unsigned cartesian<n>::size() const { return n; }
+template<unsigned n>
+double& cartesian<n>::operator[](int p) { return carr[p]; }
 
 #endif
